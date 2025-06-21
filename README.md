@@ -1,4 +1,6 @@
-## 代码库
+## Laero Model
+
+更简化的Rac Model见`StandaloneRacModel`目录
 
 ### 1、基础依赖库 (`OeBase.hpp`)
 
