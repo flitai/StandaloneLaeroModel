@@ -42,18 +42,44 @@
    - CSV文件头增加了 `TargetHdg` 等列，因为期望航向现在是轨迹的已知部分。
    - 文件中记录了每个仿真时刻飞机的完整实际状态、期望目标状态以及两者之间的各项误差，为性能评估提供了详尽的数据支持。
 
+## 输入输出
+
+### 1.  模型输入
+
+模型的输入分为两类：初始化输入和周期性更新输入。
+
+* **初始化输入**:
+  * **初始状态 (`AircraftState`)**: 通过 `setInitialState(const AircraftState& initialState)` 函数设置飞机的初始运动状态，包括：
+    * 初始位置 (`position`)
+    * 初始姿态（偏航角 `yaw`）
+    * 初始速度大小 (`bodyVelocity`)
+
+* **周期性更新输入 (在每个仿真循环中调用)**:
+  * **时间步长 (`double dt`)**: 通过 `update(const double dt)` 函数传入，是驱动模型状态积分的核心参数。
+  * **高层飞行指令**:
+    * `setCommandedAltitude(double meters, ...)`: 设置期望的飞行高度（米）。
+    * `setCommandedHeadingD(double degs, ...)`: 设置期望的飞行航向（度）。
+    * `setCommandedVelocityKts(double kts, ...)`: 设置期望的飞行速度（节）。
+
+### 2. 模型输出
+
+模型在每个 `update` 调用后，会更新其内部的飞机状态。外部应用程序可通过以下方式获取完整的飞机状态：
+
+* **完整状态数据 (`AircraftState`)**: 通过 `const AircraftState& getState() const` 函数返回一个包含飞机当前完整六自由度（6-DOF）状态的只读引用。`AircraftState` 结构体包含：
+  * **位置**: `position` (Vec3d, 世界坐标系)
+  * **速度**: `velocity` (Vec3d, 世界坐标系), `bodyVelocity` (Vec3d, 机体坐标系)
+  * **姿态**: `roll`, `pitch`, `yaw` (double, 欧拉角，弧度)
+  * **角速度**: `angularVelocity` (Vec3d, 机体坐标系 p, q, r)
+
 ## 编译
 
 将这五个文件保存在同一个目录下，然后使用C++17兼容的编译器（如g++）通过以下命令进行编译和运行：
 
 ```bash
 g++ main.cpp StandaloneLaeroModel.cpp -o TrajectorySim -std=c++17 -I.
+
 ./LaeroSim`
 ```
-
-
-
-好的，这里提供一个使用Python编写的数据分析工具，它将利用 `pandas` 库来读取和处理数据，并使用 `matplotlib` 库来绘制您指定的三个关键性能分析图表。
 
 
 
@@ -138,11 +164,17 @@ pip install pandas matplotlib
 
 确保`analyze_trajectory.py`与C++程序生成的 `maneuver_log.csv` 文件在同一个目录下。
 
-1.  **运行脚本**:
+1. **运行脚本**:
 
-      * 打开您的终端或命令行。
-      * 导航到包含 `analyze_trajectory.py` 和 `maneuver_log.csv` 的目录。
-      * 运行命令： `python analyze_trajectory.py`
+     * 打开您的终端或命令行。
+
+     * 导航到包含 `analyze_trajectory.py` 和 `maneuver_log.csv` 的目录。
+
+     * 运行命令：
+
+       ````bash
+       python analyze_trajectory.py
+       ````
 
 2.  **解读图表**:
 
