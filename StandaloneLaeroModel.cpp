@@ -15,6 +15,13 @@ void StandaloneLaeroModel::setInitialVelocityKts(double kts) {
     m_state.bodyVelocity.set(u, 0, 0);
 }
 
+void StandaloneLaeroModel::setInitialState(const AircraftState& initialState) {
+    m_state = initialState;
+    // 关键: 同时初始化内部使用的机体速度u, 否则控制律会出错
+    u = m_state.bodyVelocity.length();
+}
+
+
 void StandaloneLaeroModel::update(const double dt) {
     dT = dt;
     updateModel(dt);
